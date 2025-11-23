@@ -1,3 +1,9 @@
+export type SubTask = {
+  id: string;
+  title: string;
+  done: boolean;
+};
+
 export interface Task {
   id: string;
   userId: string;
@@ -6,5 +12,7 @@ export interface Task {
   done: boolean;
   dueDate: string;       // ISO string
   completedAt?: string;  // ISO string opcional
+  subTasks: SubTask[];
 }
+
 

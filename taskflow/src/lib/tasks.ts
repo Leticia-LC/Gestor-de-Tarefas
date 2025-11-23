@@ -1,24 +1,36 @@
-// src/lib/tasks.ts
-import { Task } from "@/types/Task";
+import { Task } from "../types/Task";
 
 export async function getUserTasks(): Promise<Task[]> {
-  const userId = typeof window !== "undefined"
-    ? localStorage.getItem("uid")
-    : null;
-
+  const userId = localStorage.getItem("uid");
   if (!userId) return [];
 
-  const response = await fetch(`/api/tasks/${userId}`, {
-    method: "GET",
-    cache: "no-store",
+  const res = await fetch(`/api/tasks/${userId}`, { cache: "no-store" });
+  return res.json();
+}
+
+export async function createTask(task: Partial<Task>) {
+  const userId = localStorage.getItem("uid");
+  const res = await fetch(`/api/tasks/${userId}`, {
+    method: "POST",
+    body: JSON.stringify(task),
   });
+  return res.json();
+}
 
-  if (!response.ok) {
-    console.error("Erro ao buscar tasks:", response.statusText);
-    return [];
-  }
+export async function updateTask(task: Task) {
+  const userId = localStorage.getItem("uid");
+  const res = await fetch(`/api/tasks/${userId}`, {
+    method: "PUT",
+    body: JSON.stringify(task),
+  });
+  return res.json();
+}
 
-  // assume que a API retorna Task[]
-  const data = await response.json();
-  return data as Task[];
+export async function deleteTask(id: string) {
+  const userId = localStorage.getItem("uid");
+  const res = await fetch(`/api/tasks/${userId}`, {
+    method: "DELETE",
+    body: JSON.stringify({ id }),
+  });
+  return res.json();
 }
