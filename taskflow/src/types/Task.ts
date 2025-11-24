@@ -1,18 +1,17 @@
-export type SubTask = {
-  id: string;
-  title: string;
-  done: boolean;
-};
-
-export interface Task {
+export type Task = {
   id: string;
   userId: string;
   title: string;
   description?: string;
+  priority: "low" | "medium" | "high";
+  dueDate: string;
   done: boolean;
-  dueDate: string;       // ISO string
-  completedAt?: string;  // ISO string opcional
-  subTasks: SubTask[];
-}
+  completedAt?: string | null;
+  subTasks: {
+    title: string;
+    done: boolean;
+  }[];
+};
+
 
 

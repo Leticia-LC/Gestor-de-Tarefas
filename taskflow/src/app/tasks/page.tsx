@@ -1,161 +1,81 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Task, SubTask } from "../../types/Task";
-import { getUserTasks, createTask, updateTask, deleteTask } from "../../lib/tasks";
-import { Card, Text, Metric, ProgressBar } from "@tremor/react";
+import { auth } from "../../lib/firebase";
+import { getTasks, deleteTask, toggleTask } from "../../lib/firebase/tasks";
+import { Task } from "../../types/Task";
+import { Button, Card, Text, ProgressBar } from "@tremor/react";
+import Link from "next/link";
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [newTask, setNewTask] = useState({
-    title: "",
-    description: "",
-    dueDate: "",
-    priority: "baixa" as "baixa" | "media" | "alta",
-  });
 
   useEffect(() => {
     load();
   }, []);
 
   async function load() {
-    const data = await getUserTasks();
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    const data = await getTasks(uid);
     setTasks(data);
   }
 
-  async function addTask() {
-    const task = await createTask(newTask);
-    setTasks([...tasks, task]);
-
-    setNewTask({ title: "", description: "", dueDate: "", priority: "baixa" });
-  }
-
-  async function toggleSub(task: Task, sub: SubTask) {
-    const updated = {
-      ...task,
-      subTasks: task.subTasks.map(s =>
-        s.id === sub.id ? { ...s, done: !s.done } : s
-      ),
-    };
-    await updateTask(updated);
+  async function handleDelete(id: string, taskId: string) {
+    await deleteTask(id, taskId);
     load();
   }
 
-  async function addSubTask(task: Task, title: string) {
-    const updated = {
-      ...task,
-      subTasks: [...task.subTasks, { id: crypto.randomUUID(), title, done: false }],
-    };
-    await updateTask(updated);
+  async function handleToggle(uid: string, taskId: string, done: boolean) {
+    await toggleTask(uid, taskId, done);
     load();
   }
 
-  async function removeTask(id: string) {
-    await deleteTask(id);
-    load();
+  function getProgress(task: Task) {
+    const total = task.subTasks.length;
+    const done = task.subTasks.filter(s => s.done).length;
+    return total ? (done / total) * 100 : 0;
   }
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Tarefas</h1>
+      <div className="flex justify-between mb-6">
+        <h1 className="text-3xl font-bold">Tarefas</h1>
+        <Link href="/tasks/new">
+          <Button>Criar Tarefa</Button>
+        </Link>
+      </div>
 
-      {/* Formulário de criação */}
-      <Card className="mb-8 p-4">
-        <h2 className="font-semibold mb-4">Criar nova tarefa</h2>
-
-        <input
-          placeholder="Título"
-          className="border p-2 rounded w-full mb-2"
-          value={newTask.title}
-          onChange={e => setNewTask({ ...newTask, title: e.target.value })}
-        />
-
-        <input
-          placeholder="Descrição"
-          className="border p-2 rounded w-full mb-2"
-          value={newTask.description}
-          onChange={e => setNewTask({ ...newTask, description: e.target.value })}
-        />
-
-        <input
-          type="date"
-          className="border p-2 rounded w-full mb-2"
-          value={newTask.dueDate}
-          onChange={e => setNewTask({ ...newTask, dueDate: e.target.value })}
-        />
-
-        <select
-          className="border p-2 rounded w-full mb-4"
-          value={newTask.priority}
-          onChange={e =>
-            setNewTask({ ...newTask, priority: e.target.value as any })
-          }
-        >
-          <option value="baixa">Baixa</option>
-          <option value="media">Média</option>
-          <option value="alta">Alta</option>
-        </select>
-
-        <button
-          onClick={addTask}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          Criar
-        </button>
-      </Card>
-
-      {/* Lista */}
       <div className="grid gap-4">
-        {tasks.map(task => {
-          const total = task.subTasks.length;
-          const done = task.subTasks.filter(s => s.done).length;
-          const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+        {tasks.map(task => (
+          <Card key={task.id} className="p-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <Text className="font-bold text-lg">{task.title}</Text>
+                <Text className="text-gray-500">{task.description}</Text>
+                <Text className="text-sm mt-1">Vence em: {task.dueDate.slice(0, 10)}</Text>
 
-          return (
-            <Card key={task.id} className="p-4">
-              <div className="flex justify-between items-center">
-                <div>
-                  <Text className="font-semibold">{task.title}</Text>
-                  <Text className="text-gray-500">{task.description}</Text>
+                <div className="mt-3">
+                  <ProgressBar value={getProgress(task)} />
                 </div>
-
-                <button
-                  onClick={() => removeTask(task.id)}
-                  className="text-red-600 font-bold"
-                >
-                  X
-                </button>
               </div>
 
-              <div className="mt-4">
-                <Text>Progresso</Text>
-                <ProgressBar value={percent} className="mt-2" />
+              <div className="flex flex-col gap-2">
+                <Button size="sm" onClick={() => handleToggle(auth.currentUser?.uid!, task.id, !task.done)}>
+                  {task.done ? "Desmarcar" : "Concluir"}
+                </Button>
+
+                <Link href={`/tasks/${task.id}`}>
+                  <Button size="sm" color="blue">Editar</Button>
+                </Link>
+
+                <Button size="sm" color="red" onClick={() => handleDelete(auth.currentUser?.uid!, task.id)}>
+                  Deletar
+                </Button>
               </div>
-
-              <div className="mt-4">
-                <h3 className="font-semibold mb-2">Subtarefas</h3>
-
-                {task.subTasks.map(sub => (
-                  <div key={sub.id} className="flex items-center mb-2">
-                    <input
-                      type="checkbox"
-                      checked={sub.done}
-                      onChange={() => toggleSub(task, sub)}
-                    />
-                    <Text className="ml-2">{sub.title}</Text>
-                  </div>
-                ))}
-
-                <button
-                  onClick={() => addSubTask(task, prompt("Nome da subtarefa:") || "")}
-                  className="text-blue-600 mt-2"
-                >
-                  + Adicionar subtarefa
-                </button>
-              </div>
-            </Card>
-          );
-        })}
+            </div>
+          </Card>
+        ))}
       </div>
     </div>
   );
