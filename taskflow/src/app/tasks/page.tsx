@@ -28,8 +28,17 @@ export default function TasksPage() {
   }
 
   async function handleDelete(id: string, taskId: string) {
-    await deleteTask(id, taskId);
-    load();
+    const ok = window.confirm("Tem certeza que deseja excluir esta tarefa e todas as subtarefas? Esta ação é irreversível.");
+    if (!ok) return;
+
+    try {
+      await deleteTask(id, taskId);
+      alert("Tarefa excluída com sucesso.");
+      load();
+    } catch (err) {
+      console.error(err);
+      alert("Não foi possível excluir a tarefa. Confira o console para mais detalhes.");
+    }
   }
 
   async function handleToggle(uid: string, taskId: string, done: boolean) {
@@ -59,15 +68,27 @@ export default function TasksPage() {
           </div>
         ) : (
           tasks.map(task => (
-          <Card key={task.id} className="p-4">
+          <Card key={task.id} className="p-4 shadow-lg rounded-lg border border-gray-100 dark:border-gray-700">
             <div className="flex justify-between items-start">
-              <div>
-                <Text className="font-bold text-lg">{task.title}</Text>
+                <div>
+                  <div className="flex items-center justify-between">
+                  <Text className="font-bold text-lg">{task.title}</Text>
+                  <span className={`text-xs font-semibold px-2 py-1 rounded-full ${task.priority === 'high' ? 'bg-red-100 text-red-700 dark:bg-red-800 dark:text-red-100' : task.priority === 'medium' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-800 dark:text-yellow-100' : 'bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-100'}`}>{task.priority === 'low' ? 'Baixa' : task.priority === 'medium' ? 'Média' : 'Alta'}</span>
+                </div>
                 <Text className="text-gray-500">{task.description}</Text>
                 <Text className="text-sm mt-1">Vence em: {task.dueDate.slice(0, 10)}</Text>
 
                 <div className="mt-3">
-                  <ProgressBar value={getProgress(task)} />
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1">
+                      <div className="h-3 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
+                        <div style={{ width: `${getProgress(task)}%` }} className="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all duration-300" />
+                      </div>
+                    </div>
+                    <div className="w-12 text-right">
+                      <span className="text-sm text-gray-700 dark:text-gray-200 font-semibold">{Math.round(getProgress(task))}%</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -80,7 +101,7 @@ export default function TasksPage() {
                   <Button size="sm" color="blue">Editar</Button>
                 </Link>
 
-                <Button size="sm" color="red" onClick={() => handleDelete(auth.currentUser?.uid!, task.id)}>
+                <Button size="sm" className="bg-red-600 text-white hover:bg-red-700" onClick={() => handleDelete(auth.currentUser?.uid!, task.id)}>
                   Deletar
                 </Button>
               </div>

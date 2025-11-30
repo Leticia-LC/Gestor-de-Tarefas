@@ -62,7 +62,7 @@ export default function EditTaskPage() {
       dueDate,
     });
 
-    router.push("/tasks");
+    router.push("/dashboard");
   };
 
   if (loading) return <p className="p-6">Carregando...</p>;

@@ -47,7 +47,7 @@ export default function EditTaskPage() {
     if (!uid) return;
 
     await updateTask(uid, task.id, task);
-    router.push("/tasks");
+    router.push("/dashboard");
   };
 
   if (loading) return <p>Carregando...</p>;

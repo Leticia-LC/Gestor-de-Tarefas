@@ -4,7 +4,7 @@ import { Card, Metric, Text, Grid, BarChart, DonutChart, Button, ProgressBar } f
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { getTasks, createTask, addSubTask, removeSubTask, toggleSubTask, toggleTask } from "../../lib/firebase/tasks";
+import { getTasks, createTask, addSubTask, removeSubTask, toggleSubTask, toggleTask, deleteTask } from "../../lib/firebase/tasks";
 import { auth } from "../../lib/firebase";
 import { Task } from "../../types/Task";
 
@@ -17,7 +17,7 @@ export default function Dashboard() {
   const [overdue, setOverdue] = useState(0);
 
   const [chartDataWeekly, setChartDataWeekly] = useState<ChartItem[]>([]);
-  const [chartDataStatus, setChartDataStatus] = useState<ChartItem[]>([]);
+  const [chartDataPriority, setChartDataPriority] = useState<ChartItem[]>([]);
   const [subInputs, setSubInputs] = useState<Record<string, string>>({});
 
   const [showModal, setShowModal] = useState(false);
@@ -60,10 +60,10 @@ export default function Dashboard() {
       { name: "Vencidas", value: over },
     ]);
 
-    setChartDataStatus([
-      { name: "Pendentes", value: pend },
-      { name: "Concluídas", value: data.filter(t => t.done).length },
-      { name: "Vencidas", value: over },
+    setChartDataPriority([
+      { name: "Baixa", value: data.filter(t => t.priority === "low").length },
+      { name: "Média", value: data.filter(t => t.priority === "medium").length },
+      { name: "Alta", value: data.filter(t => t.priority === "high").length },
     ]);
   }
 
@@ -91,6 +91,17 @@ export default function Dashboard() {
 
   function genId() {
     return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+  }
+
+  function showPriorityLabel(priority: "low" | "medium" | "high") {
+    switch (priority) {
+      case "low":
+        return "Baixa";
+      case "medium":
+        return "Média";
+      case "high":
+        return "Alta";
+    }
   }
 
   async function handleAddSubTask(taskId: string) {
@@ -123,6 +134,23 @@ export default function Dashboard() {
     if (!uid) return;
     await toggleTask(uid, taskId, done);
     loadData();
+  }
+
+  async function handleDeleteTask(taskId: string) {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+
+    const ok = window.confirm("Tem certeza que deseja excluir esta tarefa e todas as subtarefas? Esta ação é irreversível.");
+    if (!ok) return;
+
+    try {
+      await deleteTask(uid, taskId);
+      alert("Tarefa excluída com sucesso.");
+      loadData();
+    } catch (err) {
+      console.error(err);
+      alert("Não foi possível excluir a tarefa. Verifique as permissões do Firebase e o console para mais detalhes.");
+    }
   }
 
   return (
@@ -169,15 +197,42 @@ export default function Dashboard() {
           />
         </Card>
 
-        <Card className="rounded-xl shadow-md p-6 bg-white dark:bg-gray-800">
-          <Text className="text-gray-500 dark:text-gray-300 mb-2">Status Geral</Text>
-          <DonutChart
-            data={chartDataStatus}
-            index="name"
-            category="value"
-            colors={["blue", "green", "red"]}
-          />
-        </Card>
+          <Card className="rounded-xl shadow-md p-6 bg-white dark:bg-gray-800">
+            <Text className="text-gray-500 dark:text-gray-300 mb-2">Distribuição por Prioridade</Text>
+            <div className="flex items-center gap-6">
+              <div className="w-48">
+                <DonutChart
+                  data={chartDataPriority}
+                  index="name"
+                  category="value"
+                  colors={["green", "yellow", "red"]}
+                />
+              </div>
+
+              {/* Custom beautiful legend */}
+              <div className="flex-1">
+                <div className="grid grid-cols-1 gap-3">
+                  {chartDataPriority.map((d, i) => {
+                    const total = chartDataPriority.reduce((acc, cur) => acc + cur.value, 0) || 1;
+                    const percent = Math.round((d.value / total) * 100);
+                    const color = i === 0 ? "bg-green-500" : i === 1 ? "bg-yellow-400" : "bg-red-500";
+                    return (
+                      <div key={d.name} className="flex items-center justify-between gap-4 p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                        <div className="flex items-center gap-3">
+                          <span className={`inline-block w-3 h-3 rounded-full ${color}`} />
+                          <div>
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{d.name}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-300">{d.value} tarefas</div>
+                          </div>
+                        </div>
+                        <div className="text-sm font-semibold text-gray-800 dark:text-gray-200">{percent}%</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </Card>
       </Grid>
 
       {/* Lista de Tarefas */}
@@ -186,25 +241,42 @@ export default function Dashboard() {
 
         <div className="grid gap-4">
           {tasks.map((task) => (
-            <Card key={task.id} className="p-4 bg-white dark:bg-gray-800">
+            <Card key={task.id} className="p-4 bg-white dark:bg-gray-800 shadow-lg rounded-lg border border-gray-100 dark:border-gray-700">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
-                  <Text className="font-bold text-lg text-gray-900 dark:text-gray-100">{task.title}</Text>
+                  <div className="flex items-center justify-between gap-3">
+                    <Text className="font-bold text-lg text-gray-900 dark:text-gray-100">{task.title}</Text>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs font-semibold px-2 py-1 rounded-full ${task.priority === 'high' ? 'bg-red-100 text-red-700 dark:bg-red-800 dark:text-red-100' : task.priority === 'medium' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-800 dark:text-yellow-100' : 'bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-100'}`}>{showPriorityLabel(task.priority)}</span>
+                    </div>
+                  </div>
                   <Text className="text-sm text-gray-500 dark:text-gray-300">{task.description}</Text>
                   <Text className="text-sm mt-1">Vence em: {task.dueDate.slice(0, 10)}</Text>
 
-                  <div className="mt-3">
-                    <ProgressBar value={(task.subTasks.length ? (task.subTasks.filter(s => s.done).length / task.subTasks.length) * 100 : 0)} />
-                  </div>
+                    <div className="mt-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1">
+                          <div className="h-3 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
+                            <div style={{ width: `${task.subTasks.length ? (task.subTasks.filter(s => s.done).length / task.subTasks.length) * 100 : 0}%` }} className="h-full bg-gradient-to-r from-blue-500 to-green-400 transition-all duration-300" />
+                          </div>
+                        </div>
+                        <div className="w-14 text-right">
+                          <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                            {task.subTasks.length ? `${Math.round((task.subTasks.filter(s => s.done).length / task.subTasks.length) * 100)}%` : "0%"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   <div className="mt-3">
                     <div className="flex flex-col gap-2">
                       {task.subTasks.map((s, i) => (
-                        <div key={s.id} className="flex items-center gap-2 justify-between border p-2 rounded">
+                        <div key={s.id} className="flex items-center gap-2 justify-between border p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                           <div className="flex items-center gap-2">
                             <input
                               type="checkbox"
                               checked={s.done}
                               onChange={async () => handleToggleSub(task.id, s.id, !s.done)}
+                              className="w-4 h-4"
                             />
                             <span className={s.done ? "line-through" : ""}>{s.title}</span>
                           </div>
@@ -223,17 +295,21 @@ export default function Dashboard() {
                       />
                       <Button size="sm" onClick={() => handleAddSubTask(task.id)}>Adicionar</Button>
                     </div>
+                    {/* removed the secondary delete link to keep only the main red action button */}
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2 ml-4">
-                  <Button size="sm" onClick={() => handleToggleTaskDone(task.id, !task.done)}>
-                    {task.done ? "Desmarcar" : "Concluir"}
-                  </Button>
-                  <Link href={`/tasks/${task.id}`}>
-                    <Button size="sm" color="blue">Editar</Button>
-                  </Link>
-                </div>
+                  <div className="flex flex-col gap-2 ml-4">
+                    <Button size="sm" onClick={() => handleToggleTaskDone(task.id, !task.done)}>
+                      {task.done ? "Desmarcar" : "Concluir"}
+                    </Button>
+                    <Link href={`/tasks/${task.id}`}>
+                      <Button size="sm" color="blue">Editar</Button>
+                    </Link>
+                    <Button size="sm" className="bg-red-600 text-white hover:bg-red-700" onClick={() => handleDeleteTask(task.id)}>
+                      Excluir
+                    </Button>
+                  </div>
               </div>
             </Card>
           ))}
