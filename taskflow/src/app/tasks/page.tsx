@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../lib/firebase";
 import { getTasks, deleteTask, toggleTask } from "../../lib/firebase/tasks";
 import { Task } from "../../types/Task";
@@ -12,6 +13,11 @@ export default function TasksPage() {
 
   useEffect(() => {
     load();
+    const unsub = onAuthStateChanged(auth, () => {
+      load();
+    });
+
+    return () => unsub();
   }, []);
 
   async function load() {
@@ -47,7 +53,12 @@ export default function TasksPage() {
       </div>
 
       <div className="grid gap-4">
-        {tasks.map(task => (
+        {tasks.length === 0 ? (
+          <div className="p-6 bg-white rounded shadow text-gray-600">
+            Nenhuma tarefa encontrada. <Link href="/tasks/new"><span className="text-blue-600">Crie uma agora</span></Link>
+          </div>
+        ) : (
+          tasks.map(task => (
           <Card key={task.id} className="p-4">
             <div className="flex justify-between items-start">
               <div>
@@ -75,7 +86,8 @@ export default function TasksPage() {
               </div>
             </div>
           </Card>
-        ))}
+            ))
+        )}
       </div>
     </div>
   );

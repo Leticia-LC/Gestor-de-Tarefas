@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getTaskById, updateTask } from "@/lib/firebase/tasks";
+import { auth } from "@/lib/firebase";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Task } from "@/types/Task";
 
@@ -10,7 +11,7 @@ export default function EditTaskPage() {
   const router = useRouter();
 
   const taskId = searchParams.get("id");
-  const uid = localStorage.getItem("uid");
+  const uid = auth.currentUser?.uid;
 
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
@@ -45,7 +46,7 @@ export default function EditTaskPage() {
 
   // Adicionar nova subtarefa
   const addSubTask = () => {
-    const newSub = { title: "", done: false };
+    const newSub = { id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`, title: "", done: false };
     setTask((prev) =>
       prev ? { ...prev, subTasks: [...(prev.subTasks || []), newSub] } : prev
     );

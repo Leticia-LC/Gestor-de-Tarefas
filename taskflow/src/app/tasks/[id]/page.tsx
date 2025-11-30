@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
 import { useParams, useRouter } from "next/navigation";
 import { auth } from "../../../lib/firebase";
 import { getTaskById, updateTask } from "../../../lib/firebase/tasks";
@@ -24,6 +25,19 @@ export default function EditTaskPage() {
     };
 
     load();
+  }, [id]);
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, () => {
+      const uid = auth.currentUser?.uid;
+      if (!uid || !id) return;
+      (async () => {
+        const t = await getTaskById(uid, id as string);
+        setTask(t);
+        setLoading(false);
+      })();
+    });
+
+    return () => unsub();
   }, [id]);
 
   const save = async () => {
@@ -104,7 +118,7 @@ export default function EditTaskPage() {
         onClick={() =>
           setTask({
             ...task,
-            subTasks: [...task.subTasks, { title: "", done: false }],
+            subTasks: [...task.subTasks, { id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`, title: "", done: false }],
           })
         }
         className="bg-gray-200 px-3 py-1 rounded mt-3"

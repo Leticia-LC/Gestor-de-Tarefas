@@ -13,6 +13,12 @@ export default function NewTaskPage() {
   const [priority, setPriority] = useState<"low" | "medium" | "high">("low");
   const [dueDate, setDueDate] = useState("");
   const [loading, setLoading] = useState(false);
+  const [subTasks, setSubTasks] = useState<any[]>([]);
+  const [newSub, setNewSub] = useState("");
+
+  function genId() {
+    return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+  }
 
   const handleCreate = async () => {
     if (!title.trim()) return;
@@ -21,7 +27,6 @@ export default function NewTaskPage() {
     if (!uid) return;
 
     setLoading(true);
-
     await createTask(uid, {
       userId: uid,
       title,
@@ -30,7 +35,7 @@ export default function NewTaskPage() {
       dueDate,
       done: false,
       completedAt: null,
-      subTasks: [],
+      subTasks,
     });
 
     router.push("/tasks");
@@ -84,6 +89,38 @@ export default function NewTaskPage() {
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
           />
+        </div>
+
+        <div>
+          <label className="block mb-1 font-medium">Subtarefas</label>
+          <div className="flex gap-2 mb-2">
+            <input
+              className="flex-1 border p-2 rounded"
+              value={newSub}
+              onChange={(e) => setNewSub(e.target.value)}
+              placeholder="Nova subtarefa..."
+            />
+            <button
+              className="bg-blue-600 text-white px-4 rounded"
+              type="button"
+              onClick={() => {
+                if (!newSub.trim()) return;
+                setSubTasks([...subTasks, { id: genId(), title: newSub, done: false }]);
+                setNewSub("");
+              }}
+            >
+              +
+            </button>
+          </div>
+
+          <ul>
+            {subTasks.map((s) => (
+              <li key={s.id} className="flex items-center gap-2 mb-1">
+                <input type="checkbox" checked={s.done} readOnly />
+                <span>{s.title}</span>
+              </li>
+            ))}
+          </ul>
         </div>
 
         <button

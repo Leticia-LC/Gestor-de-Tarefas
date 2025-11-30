@@ -1,8 +1,10 @@
 "use client";
 
-import { Card, Metric, Text, Grid, BarChart, DonutChart } from "@tremor/react";
+import { Card, Metric, Text, Grid, BarChart, DonutChart, Button, ProgressBar } from "@tremor/react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getTasks, createTask } from "../../lib/firebase/tasks";
+import { onAuthStateChanged } from "firebase/auth";
+import { getTasks, createTask, addSubTask, removeSubTask, toggleSubTask, toggleTask } from "../../lib/firebase/tasks";
 import { auth } from "../../lib/firebase";
 import { Task } from "../../types/Task";
 
@@ -16,12 +18,21 @@ export default function Dashboard() {
 
   const [chartDataWeekly, setChartDataWeekly] = useState<ChartItem[]>([]);
   const [chartDataStatus, setChartDataStatus] = useState<ChartItem[]>([]);
+  const [subInputs, setSubInputs] = useState<Record<string, string>>({});
 
   const [showModal, setShowModal] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [newTaskDueDate, setNewTaskDueDate] = useState("");
+  const [newTaskPriority, setNewTaskPriority] = useState<"low" | "medium" | "high">("medium");
 
   useEffect(() => {
     loadData();
+    const unsub = onAuthStateChanged(auth, () => {
+      loadData();
+    });
+
+    return () => unsub();
   }, []);
 
   async function loadData() {
@@ -65,9 +76,9 @@ export default function Dashboard() {
     await createTask(uid, {
       userId: uid,
       title: newTaskTitle,
-      description: "",
-      priority: "medium",
-      dueDate: new Date().toISOString(),
+      description: newTaskDescription,
+      priority: newTaskPriority,
+      dueDate: newTaskDueDate || new Date().toISOString(),
       done: false,
       completedAt: null,
       subTasks: [],
@@ -75,6 +86,42 @@ export default function Dashboard() {
 
     setNewTaskTitle("");
     setShowModal(false);
+    loadData();
+  }
+
+  function genId() {
+    return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+  }
+
+  async function handleAddSubTask(taskId: string) {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    const title = subInputs[taskId];
+    if (!title || !title.trim()) return;
+
+    await addSubTask(uid, taskId, { id: genId(), title, done: false });
+    setSubInputs((prev) => ({ ...prev, [taskId]: "" }));
+    loadData();
+  }
+
+  async function handleToggleSub(taskId: string, subIndexOrId: number | string, done: boolean) {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    await toggleSubTask(uid, taskId, subIndexOrId as any, done);
+    loadData();
+  }
+
+  async function handleRemoveSub(taskId: string, sub: any) {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    await removeSubTask(uid, taskId, sub);
+    loadData();
+  }
+
+  async function handleToggleTaskDone(taskId: string, done: boolean) {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    await toggleTask(uid, taskId, done);
     loadData();
   }
 
@@ -133,6 +180,66 @@ export default function Dashboard() {
         </Card>
       </Grid>
 
+      {/* Lista de Tarefas */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Tarefas</h2>
+
+        <div className="grid gap-4">
+          {tasks.map((task) => (
+            <Card key={task.id} className="p-4 bg-white dark:bg-gray-800">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <Text className="font-bold text-lg text-gray-900 dark:text-gray-100">{task.title}</Text>
+                  <Text className="text-sm text-gray-500 dark:text-gray-300">{task.description}</Text>
+                  <Text className="text-sm mt-1">Vence em: {task.dueDate.slice(0, 10)}</Text>
+
+                  <div className="mt-3">
+                    <ProgressBar value={(task.subTasks.length ? (task.subTasks.filter(s => s.done).length / task.subTasks.length) * 100 : 0)} />
+                  </div>
+                  <div className="mt-3">
+                    <div className="flex flex-col gap-2">
+                      {task.subTasks.map((s, i) => (
+                        <div key={s.id} className="flex items-center gap-2 justify-between border p-2 rounded">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={s.done}
+                              onChange={async () => handleToggleSub(task.id, s.id, !s.done)}
+                            />
+                            <span className={s.done ? "line-through" : ""}>{s.title}</span>
+                          </div>
+                          <button className="text-red-500" onClick={async () => handleRemoveSub(task.id, s)}>Remover</button>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-2 flex gap-2">
+                      <input
+                        type="text"
+                        className="flex-1 border p-2 rounded"
+                        placeholder="Nova subtarefa..."
+                        value={subInputs[task.id] || ""}
+                        onChange={(e) => setSubInputs((prev) => ({ ...prev, [task.id]: e.target.value }))}
+                      />
+                      <Button size="sm" onClick={() => handleAddSubTask(task.id)}>Adicionar</Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 ml-4">
+                  <Button size="sm" onClick={() => handleToggleTaskDone(task.id, !task.done)}>
+                    {task.done ? "Desmarcar" : "Concluir"}
+                  </Button>
+                  <Link href={`/tasks/${task.id}`}>
+                    <Button size="sm" color="blue">Editar</Button>
+                  </Link>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
@@ -145,6 +252,29 @@ export default function Dashboard() {
               onChange={(e) => setNewTaskTitle(e.target.value)}
               className="w-full p-2 mb-4 border rounded-md dark:bg-gray-700 dark:text-gray-100"
             />
+            <textarea
+              placeholder="Descrição (opcional)"
+              value={newTaskDescription}
+              onChange={(e) => setNewTaskDescription(e.target.value)}
+              className="w-full p-2 mb-4 border rounded-md dark:bg-gray-700 dark:text-gray-100"
+            />
+            <div className="flex gap-2 mb-4">
+              <select
+                value={newTaskPriority}
+                onChange={(e) => setNewTaskPriority(e.target.value as any)}
+                className="border p-2 rounded"
+              >
+                <option value="low">Baixa</option>
+                <option value="medium">Média</option>
+                <option value="high">Alta</option>
+              </select>
+              <input
+                type="date"
+                value={newTaskDueDate}
+                onChange={(e) => setNewTaskDueDate(e.target.value)}
+                className="border p-2 rounded"
+              />
+            </div>
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowModal(false)}

@@ -12,6 +12,10 @@ import {
 } from "../../../../lib/firebase/tasks";
 import { Task } from "../../../../types/Task";
 
+function genId() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
 export default function EditTaskPage() {
   const router = useRouter();
   const params = useParams();
@@ -171,15 +175,10 @@ export default function EditTaskPage() {
                 if (!uid || !task) return;
                 if (!newSub.trim()) return;
 
-                await addSubTask(uid, task.id, {
-                  title: newSub,
-                  done: false,
-                });
+                const s = { id: genId(), title: newSub, done: false };
+                await addSubTask(uid, task.id, s);
 
-                setTask({
-                  ...task,
-                  subTasks: [...task.subTasks, { title: newSub, done: false }],
-                });
+                setTask({ ...task, subTasks: [...task.subTasks, s] });
 
                 setNewSub("");
               }}
@@ -218,9 +217,9 @@ export default function EditTaskPage() {
                     const uid = auth.currentUser?.uid;
                     if (!uid || !task) return;
 
-                    await removeSubTask(uid, task.id, s);
+                      await removeSubTask(uid, task.id, s);
 
-                    const updated = task.subTasks.filter((_, idx) => idx !== i);
+                      const updated = task.subTasks.filter((_, idx) => idx !== i);
                     setTask({ ...task, subTasks: updated });
                   }}
                 >
