@@ -29,3 +29,20 @@ html, body {
   background-color: #f5f7fa !important; /* fundo */
   color: #0f172a !important; /* texto */
 }
+
+/* Tremor Chart overrides: force barras do BarChart em azul (#2563EB).
+   Usamos seletores SVG amplos e !important para sobrepor temas ou estilos da lib.
+   Se isso afetar outros svgs, podemos restringir o seletor adicionando
+   uma classe `dashboard-page` no wrapper da página e usar
+   `.dashboard-page .tremor-chart svg rect` aqui. */
+.dashboard-page .bar-chart-wrapper svg rect,
+.dashboard-page .bar-chart-wrapper svg path,
+.dashboard-page .bar-chart-wrapper svg g rect,
+.dashboard-page .bar-chart-wrapper svg g path,
+.dashboard-page .bar-chart-wrapper svg .bar,
+.dashboard-page .bar-chart-wrapper svg .recharts-bar,
+.dashboard-page .bar-chart-wrapper svg [data-bar],
+.dashboard-page .bar-chart-wrapper svg [data-bar] * {
+  fill: #2563EB !important;
+  stroke: #2563EB !important;
+}

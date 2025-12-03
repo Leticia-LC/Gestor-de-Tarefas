@@ -154,7 +154,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="dashboard-page p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
         {/* BOTÃO FUNCIONANDO */}
@@ -188,25 +188,28 @@ export default function Dashboard() {
       <Grid numItems={2} className="gap-6 mb-8">
         <Card className="rounded-xl shadow-md p-6 bg-white dark:bg-gray-800">
           <Text className="text-gray-500 dark:text-gray-300 mb-2">Resumo da Semana</Text>
-          <BarChart
-            data={chartDataWeekly}
-            index="name"
-            categories={["value"]}
-            colors={["blue"]}
-            yAxisWidth={40}
-          />
+          <div className="bar-chart-wrapper">
+            <BarChart
+              data={chartDataWeekly}
+              index="name"
+              categories={["value"]}
+              /* Use an explicit blue hex color to ensure bars render blue */
+              colors={["#2563EB"]}
+              yAxisWidth={40}
+            />
+          </div>
         </Card>
 
           <Card className="rounded-xl shadow-md p-6 bg-white dark:bg-gray-800">
             <Text className="text-gray-500 dark:text-gray-300 mb-2">Distribuição por Prioridade</Text>
             <div className="flex items-center gap-6">
               <div className="w-48">
-                <DonutChart
-                  data={chartDataPriority}
-                  index="name"
-                  category="value"
-                  colors={["green", "yellow", "red"]}
-                />
+                  <DonutChart
+                    data={chartDataPriority}
+                    index="name"
+                    category="value"
+                    colors={["emerald", "amber", "rose"]}
+                  />
               </div>
 
               {/* Custom beautiful legend */}
