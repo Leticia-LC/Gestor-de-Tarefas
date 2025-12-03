@@ -157,13 +157,18 @@ export default function Dashboard() {
     <div className="dashboard-page p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
-        {/* BOTÃO FUNCIONANDO */}
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-        >
-          Adicionar Tarefa
-        </button>
+        <div className="flex items-center gap-3">
+          <Link href="/calendar">
+            <button className="bg-white border border-gray-200 text-gray-800 px-3 py-2 rounded hover:bg-gray-50 transition">Calendário</button>
+          </Link>
+          {/* BOTÃO FUNCIONANDO */}
+          <button
+            onClick={() => setShowModal(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+          >
+            Adicionar Tarefa
+          </button>
+        </div>
       </div>
 
       {/* Métricas */}
