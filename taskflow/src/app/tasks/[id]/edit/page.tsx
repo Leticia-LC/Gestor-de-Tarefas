@@ -81,7 +81,15 @@ export default function EditTaskPage() {
 
   return (
     <div className="p-6 max-w-xl mx-auto">
-      <h1 className="text-3xl font-bold mb-2">Editar Tarefa</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">Editar Tarefa</h1>
+        <button
+          onClick={() => router.push("/dashboard")}
+          className="bg-gray-400 text-white px-3 py-2 rounded hover:bg-gray-500 transition"
+        >
+          Voltar
+        </button>
+      </div>
 
       {/* BARRA DE PROGRESSO */}
       <div className="w-full bg-gray-200 rounded h-4 overflow-hidden mb-2">

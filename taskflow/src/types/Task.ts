@@ -14,4 +14,5 @@ export type Task = {
   done: boolean;
   completedAt: string | null;
   subTasks: SubTask[];
+  status?: "todo" | "doing" | "done"; // Kanban status: A Fazer, Fazendo, Concluído
 };

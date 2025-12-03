@@ -48,6 +48,7 @@ export async function getTasks(uid: string): Promise<Task[]> {
       done: !!data?.done,
       completedAt: data?.completedAt ?? null,
       subTasks,
+      status: data?.status || "todo", // Include Kanban status
     } as Task;
   }) as Task[];
 }
@@ -75,6 +76,7 @@ export async function getTaskById(uid: string, taskId: string): Promise<Task | n
     done: !!data?.done,
     completedAt: data?.completedAt ?? null,
     subTasks,
+    status: data?.status || "todo", // Include Kanban status
   } as Task;
 }
 

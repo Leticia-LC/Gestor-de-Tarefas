@@ -161,6 +161,9 @@ export default function Dashboard() {
           <Link href="/calendar">
             <button className="bg-white border border-gray-200 text-gray-800 px-3 py-2 rounded hover:bg-gray-50 transition">Calendário</button>
           </Link>
+          <Link href="/kanban">
+            <button className="bg-white border border-gray-200 text-gray-800 px-3 py-2 rounded hover:bg-gray-50 transition">Kanban</button>
+          </Link>
           {/* BOTÃO FUNCIONANDO */}
           <button
             onClick={() => setShowModal(true)}
