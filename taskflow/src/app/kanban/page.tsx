@@ -253,7 +253,7 @@ export default function KanbanPage() {
             ))}
           </div>
         </SortableContext>
-        <DragOverlay>{activeId ? <div className="p-3 bg-blue-500 rounded text-white">Movendo...</div> : null}</DragOverlay>
+        <DragOverlay>{activeId ? <div className="p-3 btn-primary rounded text-white">Movendo...</div> : null}</DragOverlay>
       </DndContext>
     </div>
   );

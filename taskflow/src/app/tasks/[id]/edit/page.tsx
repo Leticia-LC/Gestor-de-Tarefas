@@ -177,7 +177,7 @@ export default function EditTaskPage() {
               onChange={(e) => setNewSub(e.target.value)}
             />
             <button
-              className="bg-blue-600 text-white px-4 rounded"
+              className="px-4 rounded btn-primary text-white"
               onClick={async () => {
                 const uid = auth.currentUser?.uid;
                 if (!uid || !task) return;
@@ -240,7 +240,7 @@ export default function EditTaskPage() {
 
         <button
           onClick={handleSave}
-          className="bg-green-600 text-white py-2 rounded"
+          className="py-2 rounded btn-primary"
         >
           Salvar Alterações
         </button>

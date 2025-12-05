@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, Metric, Text, Grid, BarChart, DonutChart, Button, ProgressBar } from "@tremor/react";
+import { PRIMARY_COLOR } from "../../lib/colors";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
@@ -16,8 +17,21 @@ export default function Dashboard() {
   const [doneThisWeek, setDoneThisWeek] = useState(0);
   const [overdue, setOverdue] = useState(0);
 
-  const [chartDataWeekly, setChartDataWeekly] = useState<ChartItem[]>([]);
-  const [chartDataPriority, setChartDataPriority] = useState<ChartItem[]>([]);
+  // sensible defaults so the charts render immediately (avoids disappearing on first render)
+  const defaultWeekly: ChartItem[] = [
+    { name: "Pendentes", value: 0 },
+    { name: "Concluídas Semana", value: 0 },
+    { name: "Vencidas", value: 0 },
+  ];
+
+  const defaultPriority: ChartItem[] = [
+    { name: "Baixa", value: 0 },
+    { name: "Média", value: 0 },
+    { name: "Alta", value: 0 },
+  ];
+
+  const [chartDataWeekly, setChartDataWeekly] = useState<ChartItem[]>(defaultWeekly);
+  const [chartDataPriority, setChartDataPriority] = useState<ChartItem[]>(defaultPriority);
   const [subInputs, setSubInputs] = useState<Record<string, string>>({});
   const [showModal, setShowModal] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
@@ -171,7 +185,7 @@ export default function Dashboard() {
           {/* BOTÃO FUNCIONANDO */}
           <button
             onClick={() => setShowModal(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+            className="px-4 py-2 rounded btn-primary transition"
           >
             Adicionar Tarefa
           </button>
@@ -201,14 +215,18 @@ export default function Dashboard() {
         <Card className="rounded-xl shadow-md p-6 bg-white dark:bg-gray-800">
           <Text className="text-gray-500 dark:text-gray-300 mb-2">Resumo da Semana</Text>
           <div className="bar-chart-wrapper">
-            <BarChart
-              data={chartDataWeekly}
-              index="name"
-              categories={["value"]}
-              /* Use an explicit blue hex color to ensure bars render blue */
-              colors={["#2563EB"]}
-              yAxisWidth={40}
-            />
+            {chartDataWeekly.length > 0 ? (
+              <BarChart
+                data={chartDataWeekly}
+                index="name"
+                categories={["value"]}
+                colors={[PRIMARY_COLOR]}
+                yAxisWidth={40}
+                className="h-72"
+              />
+            ) : (
+              <div className="h-72 flex items-center justify-center text-sm text-gray-500 dark:text-gray-300">Sem dados para mostrar</div>
+            )}
           </div>
         </Card>
 
@@ -375,7 +393,7 @@ export default function Dashboard() {
               </button>
               <button
                 onClick={handleAddTask}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                className="px-4 py-2 rounded btn-primary transition"
               >
                 Adicionar
               </button>

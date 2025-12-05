@@ -3,6 +3,9 @@
 :root {
   --background: #f5f7fa;
   --foreground: #0f172a; /* azul bem escuro */
+  --color-primary: #4f46e5; /* indigo-600 */
+  --color-primary-dark: #4338ca; /* indigo-700 */
+  --color-primary-light: #818cf8; /* indigo-300-ish */
 }
 
 @theme inline {
@@ -30,11 +33,12 @@ html, body {
   color: #0f172a !important; /* texto */
 }
 
-/* Tremor Chart overrides: force barras do BarChart em azul (#2563EB).
+/* Tremor Chart overrides: force barras do BarChart para cor primária (indigo-600 / #4f46e5).
    Usamos seletores SVG amplos e !important para sobrepor temas ou estilos da lib.
    Se isso afetar outros svgs, podemos restringir o seletor adicionando
    uma classe `dashboard-page` no wrapper da página e usar
    `.dashboard-page .tremor-chart svg rect` aqui. */
+.dashboard-page .bar-chart-wrapper svg,
 .dashboard-page .bar-chart-wrapper svg rect,
 .dashboard-page .bar-chart-wrapper svg path,
 .dashboard-page .bar-chart-wrapper svg g rect,
@@ -42,7 +46,32 @@ html, body {
 .dashboard-page .bar-chart-wrapper svg .bar,
 .dashboard-page .bar-chart-wrapper svg .recharts-bar,
 .dashboard-page .bar-chart-wrapper svg [data-bar],
-.dashboard-page .bar-chart-wrapper svg [data-bar] * {
-  fill: #2563EB !important;
-  stroke: #2563EB !important;
+.dashboard-page .bar-chart-wrapper svg [data-bar] *,
+/* also make the landing page chart use the same primary color */
+.landing-chart-wrapper svg,
+.landing-chart-wrapper svg rect,
+.landing-chart-wrapper svg path,
+.landing-chart-wrapper svg g rect,
+.landing-chart-wrapper svg g path,
+.landing-chart-wrapper svg .bar,
+.landing-chart-wrapper svg .recharts-bar,
+.landing-chart-wrapper svg [data-bar],
+.landing-chart-wrapper svg [data-bar] * {
+  fill: #4f46e5 !important;
+  stroke: #4f46e5 !important;
+}
+/* Standardized primary button used across the app */
+.btn-primary {
+  background-color: var(--color-primary) !important;
+  color: white !important;
+}
+.btn-primary:hover {
+  background-color: var(--color-primary-dark) !important;
+}
+
+/* Primary outline (for nav/secondary) */
+.btn-primary-outline {
+  border: 1px solid var(--color-primary) !important;
+  color: var(--color-primary) !important;
+  background: transparent !important;
 }

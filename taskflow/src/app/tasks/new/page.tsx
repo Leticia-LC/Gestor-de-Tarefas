@@ -109,7 +109,7 @@ export default function NewTaskPage() {
               placeholder="Nova subtarefa..."
             />
             <button
-              className="bg-blue-600 text-white px-4 rounded"
+              className="px-4 rounded btn-primary text-white"
               type="button"
               onClick={() => {
                 if (!newSub.trim()) return;
@@ -134,7 +134,7 @@ export default function NewTaskPage() {
         <button
           onClick={handleCreate}
           disabled={loading}
-          className="bg-blue-600 text-white py-2 rounded disabled:opacity-50"
+          className="py-2 rounded btn-primary disabled:opacity-50"
         >
           {loading ? "Salvando..." : "Criar Tarefa"}
         </button>

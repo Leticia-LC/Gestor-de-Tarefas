@@ -105,7 +105,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 text-white p-2 rounded disabled:opacity-60"
+            className="w-full btn-primary p-2 rounded disabled:opacity-60"
           >
             {loading ? "Entrando..." : "Entrar"}
           </button>

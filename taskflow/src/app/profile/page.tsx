@@ -75,7 +75,7 @@ export default function ProfilePage() {
 
         <div className="flex gap-2 justify-end">
           <button type="button" onClick={handleSignOut} className="px-4 py-2 rounded bg-red-600 text-white">Sair</button>
-          <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white">Salvar</button>
+          <button type="submit" className="px-4 py-2 rounded btn-primary">Salvar</button>
         </div>
       </form>
     </div>

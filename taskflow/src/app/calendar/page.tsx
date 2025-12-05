@@ -152,7 +152,7 @@ export default function CalendarPage() {
             <div className="flex justify-end gap-2">
               <button onClick={() => setShowModal(false)} className="bg-gray-400 px-4 py-2 rounded hover:bg-gray-500">Fechar</button>
               <Link href={`/tasks/${selectedTask.id}`}>
-                <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Editar</button>
+                <button className="px-4 py-2 rounded btn-primary">Editar</button>
               </Link>
               <button onClick={() => handleDelete(selectedTask.id)} className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Excluir</button>
             </div>

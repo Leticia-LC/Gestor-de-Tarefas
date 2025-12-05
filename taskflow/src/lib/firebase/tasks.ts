@@ -48,7 +48,14 @@ export async function getTasks(uid: string): Promise<Task[]> {
       done: !!data?.done,
       completedAt: data?.completedAt ?? null,
       subTasks,
-      status: data?.status || "todo", // Include Kanban status
+        status: data?.status || "todo", // Include Kanban status
+        workLog: (data?.workLog || []).map((w: any) => ({
+          id: w.id || genId(),
+          timestamp: w.timestamp || new Date().toISOString(),
+          author: w.author || "",
+          message: w.message || "",
+          type: w.type || "comment",
+        })),
     } as Task;
   }) as Task[];
 }
@@ -129,3 +136,17 @@ export async function toggleSubTask(uid: string, taskId: string, indexOrId: numb
 
   await updateDoc(ref, { subTasks: updated });
 }
+
+  export async function addWorkLog(uid: string, taskId: string, work: any) {
+    const ref = doc(db, `users/${uid}/tasks/${taskId}`);
+    // ensure id + timestamp are present
+    const payload = {
+      id: work.id || genId(),
+      timestamp: work.timestamp || new Date().toISOString(),
+      author: work.author || "",
+      message: work.message || "",
+      type: work.type || "comment",
+    };
+
+    await updateDoc(ref, { workLog: arrayUnion(payload) });
+  }

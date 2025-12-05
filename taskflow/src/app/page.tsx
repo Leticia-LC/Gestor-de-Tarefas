@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { BarChart, Card, Text } from "@tremor/react";
+import { PRIMARY_COLOR, PRIMARY_LIGHT } from "../lib/colors";
 
 export default function LandingPage() {
   // Dados de exemplo para o gráfico
@@ -25,7 +26,7 @@ export default function LandingPage() {
             <p className="mt-4 text-lg text-slate-600">TaskFlow ajuda você a planejar, priorizar e entregar tarefas com visualização em calendário, quadro Kanban e métricas inteligentes.</p>
 
             <div className="mt-8 flex gap-4">
-              <Link href="/signup" className="inline-flex items-center gap-3 px-6 py-3 rounded-lg bg-indigo-600 text-white font-semibold">Começar grátis</Link>
+              <Link href="/signup" className="inline-flex items-center gap-3 px-6 py-3 rounded-lg btn-primary font-semibold">Começar grátis</Link>
               <a href="#features" className="inline-flex items-center gap-3 px-6 py-3 rounded-lg border">Ver recursos</a>
             </div>
 
@@ -39,10 +40,10 @@ export default function LandingPage() {
                 data={chartData}
                 index="semana"
                 categories={["concluídas", "pendentes"]}
-                colors={["#4f46e5", "#818cf8"]}
+                colors={[PRIMARY_COLOR, PRIMARY_LIGHT]}
                 valueFormatter={(value) => `${value}`}
                 yAxisWidth={40}
-                height={280}
+                className="h-72"
               />
             </Card>
           </div>
