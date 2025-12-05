@@ -38,7 +38,7 @@ export default function Header() {
           <Link href="/" className="text-lg font-semibold text-gray-900 dark:text-gray-100">TaskFlow</Link>
         </div>
 
-        <nav className="hidden md:flex items-center gap-6">
+        <nav aria-label="Main navigation" className="hidden md:flex items-center gap-6">
           {loggedIn && (
             <Link href="/dashboard" className="text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600">Dashboard</Link>
           )}

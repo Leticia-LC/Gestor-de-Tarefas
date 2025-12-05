@@ -8,6 +8,24 @@
   --color-primary-light: #818cf8; /* indigo-300-ish */
 }
 
+/* OpenDyslexic webfont (hosted from GitHub via jsDelivr). We prefer woff2 if supported. */
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://cdn.jsdelivr.net/gh/antijingoist/opendyslexic@main/compiled/OpenDyslexic-Regular.woff2') format('woff2'),
+       url('https://cdn.jsdelivr.net/gh/antijingoist/opendyslexic@main/compiled/OpenDyslexic-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://cdn.jsdelivr.net/gh/antijingoist/opendyslexic@main/compiled/OpenDyslexic-Bold.woff2') format('woff2'),
+       url('https://cdn.jsdelivr.net/gh/antijingoist/opendyslexic@main/compiled/OpenDyslexic-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: bold;
+  font-display: swap;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -74,4 +92,106 @@ html, body {
   border: 1px solid var(--color-primary) !important;
   color: var(--color-primary) !important;
   background: transparent !important;
+}
+
+/* ACCESSIBILITY HELPERS */
+.accessibility-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+}
+
+.accessibility-toolbar .skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.accessibility-toolbar .skip-link:focus,
+.skip-link:active {
+  left: 1rem;
+  top: 1rem;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 0.75rem;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.15);
+}
+
+/* high contrast theme */
+.a11y-high-contrast {
+  --background: #000 !important;
+  --foreground: #fff !important;
+  --color-primary: #ffd400 !important; /* yellow-ish primary for contrast */
+}
+
+/* Ensure primary buttons are readable in high-contrast: prefer dark text on yellow primary */
+.a11y-high-contrast .btn-primary {
+  color: #000 !important; /* black text on yellow primary */
+  border: 2px solid #000 !important;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.03) inset !important;
+}
+
+/* Ensure any button-like control remains visible in high-contrast mode. Some
+   UI components (library buttons or inline elements) don't always use
+   `.btn-primary` so force a fallback treatment for button elements and common
+   button-ish classes so the Edit/Salvar/CTA controls remain visible. */
+.a11y-high-contrast button,
+.a11y-high-contrast [role="button"],
+.a11y-high-contrast input[type="button"],
+.a11y-high-contrast input[type="submit"],
+.a11y-high-contrast .btn,
+.a11y-high-contrast [class*="btn-"],
+.a11y-high-contrast .tr-button {
+  background-color: var(--color-primary) !important;
+  color: #000 !important;
+  border: 2px solid #000 !important;
+  box-shadow: none !important;
+}
+
+/* Ensure focus outlines are strongly visible in high-contrast */
+.a11y-high-contrast :focus-visible {
+  outline: 3px solid #000 !important;
+  outline-offset: 2px !important;
+}
+
+/* stronger focus / borders so elements remain visible */
+.a11y-high-contrast :is(button, a, input, textarea) {
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.03) !important;
+}
+
+/* large text */
+.a11y-large-text {
+  font-size: 1.15rem !important;
+}
+
+/* dyslexic friendly adjustments (font fallback to support) */
+.a11y-dyslexic {
+  /* prefer a dyslexic-friendly font if installed; fallback to system sans */
+  font-family: 'OpenDyslexic', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial !important;
+  letter-spacing: 0.2px !important;
+}
+
+/* reduce motion */
+.a11y-reduce-motion *,
+.a11y-reduce-motion *::before,
+.a11y-reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* stronger focus outlines for keyboard */
+:focus-visible {
+  outline: 3px solid var(--color-primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* reduce motion respect: prefer-reduced-motion fallback if user preference */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
 }
