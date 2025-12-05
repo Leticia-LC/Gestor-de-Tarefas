@@ -19,7 +19,6 @@ export default function Dashboard() {
   const [chartDataWeekly, setChartDataWeekly] = useState<ChartItem[]>([]);
   const [chartDataPriority, setChartDataPriority] = useState<ChartItem[]>([]);
   const [subInputs, setSubInputs] = useState<Record<string, string>>({});
-
   const [showModal, setShowModal] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
@@ -156,7 +155,12 @@ export default function Dashboard() {
   return (
     <div className="dashboard-page p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
+        <div className="flex items-center gap-4">
+          <Link href="/">
+            <button className="text-sm px-3 py-1 border rounded bg-white dark:bg-gray-700">Voltar</button>
+          </Link>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
+        </div>
         <div className="flex items-center gap-3">
           <Link href="/calendar">
             <button className="bg-white border border-gray-200 text-gray-800 px-3 py-2 rounded hover:bg-gray-50 transition">Calendário</button>

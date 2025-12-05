@@ -4,6 +4,14 @@ export type SubTask = {
   done: boolean;
 };
 
+export type WorkLog = {
+  id: string;
+  timestamp: string;
+  author: string;
+  message: string;
+  type: "comment" | "status_change" | "edit";
+};
+
 export type Task = {
   id: string;
   userId: string;
@@ -15,4 +23,5 @@ export type Task = {
   completedAt: string | null;
   subTasks: SubTask[];
   status?: "todo" | "doing" | "done"; // Kanban status: A Fazer, Fazendo, Concluído
+  workLog?: WorkLog[]; // Log de atividades/comentários
 };
