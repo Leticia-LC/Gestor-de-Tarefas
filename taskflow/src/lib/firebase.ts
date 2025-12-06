@@ -13,7 +13,7 @@ const clientCredentials = {
 };
 
 if (!clientCredentials.apiKey) {
-  throw new Error("Missing Firebase environment variables.");
+  console.warn("Firebase env vars are missing — app running without Firebase.");
 }
 
 // evita múltiplas inicializações no HMR
